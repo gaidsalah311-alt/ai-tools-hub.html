@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>مركز أدوات الذكاء الاصطناعي | AI Tools Hub</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#00dcff">
+    <style>
+        :root { --bg: #060810; --card: #0f121d; --text: #f8fafc; --accent: #00dcff; --border: rgba(255,255,255,0.08); }
+        body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
+        .icon { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 10px; }
+        #search { width: 100%; padding: 12px; border-radius: 25px; border: 1px solid var(--border); background: var(--card); color: white; }
+    </style>
+</head>
+<body>
+    <input type="text" id="search" placeholder="ابحث عن أداة..." oninput="doSearch(this.value)">
+    <div id="tools-grid" class="grid"></div>
+
+    <script>
+        let tools = [];
+        async function init() {
+            try {
+                const res = await fetch('./tools.json');
+                const data = await res.json();
+                tools = data.tools;
+                render(tools);
+            } catch(e) { console.error("Error loading tools"); }
+        }
+        function render(arr) {
+            document.getElementById('tools-grid').innerHTML = arr.map(t => `
+                <div class="card">
+                    <img class="icon" src="https://logo.clearbit.com/${t.dom}" onerror="this.src='https://www.google.com/s2/favicons?domain=${t.dom}&sz=128'">
+                    <h3>${t.n}</h3>
+                    <p style="color:#94a3b8; font-size:0.9rem">${t.d}</p>
+                    <a href="${t.u}" target="_blank" rel="noopener noreferrer" style="color:var(--accent); text-decoration:none; font-weight:bold">زيارة الموقع ←</a>
+                </div>
+            `).join('');
+        }
+        function doSearch(q) {
+            const f = tools.filter(t => t.n.toLowerCase().includes(q.toLowerCase()) || t.d.includes(q));
+            render(f);
+        }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
+        window.onload = init;
+    </script>
+</body>
+</html>
